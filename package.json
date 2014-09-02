@@ -1,5 +1,5 @@
 {
-  "name": "specapi",
+  "name": "restspec",
   "version": "0.1.0",
   "description": "REST API test sdk, base on frisbyjs.",
   "main": "index.js",
