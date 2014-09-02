@@ -1,8 +1,18 @@
 var frisby  = require('frisby')
   , async   = require('async')
-  , _       = require('undersocre');
+  , _       = require('underscore');
+
+__bind = function(fn, me) {
+  return function() {
+    return fn.apply(me, arguments);
+  };
+};
 
 function Restspec(opts) {
+  this.initialize = __bind(this.initialize, this)
+  this.run = __bind(this.run, this)
+  this.testCase = __bind(this.testCase, this)
+  this.done = __bind(this.done , this)
   this.initialize(opts);
   this.initGlobals();
   this.run();
@@ -50,9 +60,10 @@ Restspec.prototype.initGlobals = function() {
 // 测试单个用例
 Restspec.prototype.testCase = function(_case, callback) {
   // 创建一个测试
-  var chain = frisby.create(this.options.name);
+  var chain = frisby.create(this.options.name)
+    , url = this.options.urlRoot + _case.uri;
   // 发起请求
-  chain = chain[_case.verb || 'get'](_case.uri, _case.data);
+  chain = chain[_case.verb || 'get'](url, _case.data);
 
   // 断言开始
   _.each(_case.expects, function(value, key) {
@@ -79,4 +90,4 @@ Restspec.prototype.run = function() {
   async.eachSeries(this.options.cases, this.testCase, this.done);
 };
 
-module.exports = restspec;
+module.exports = Restspec;
