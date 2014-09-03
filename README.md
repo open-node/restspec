@@ -4,10 +4,10 @@
 
 * npm install restspec --save
 
-<pre>
+```js
 var Restspec = require('restspec');
 new Restspec(options);
-</pre>
+```
 
 ## options
 
@@ -24,7 +24,7 @@ new Restspec(options);
 * `headers` Object, Request customer headers.
 * `data` Fixed, Request send data.
 * `expects` Object, Look [frisbyjs api document](http://frisbyjs.com/docs/api/)
-  <pre>
+  ```js
     expects: {
       Status: 201,
       JSON: {
@@ -36,7 +36,7 @@ new Restspec(options);
         name: String
       }]
     }
-  </pre>
+  ```
 
 ## Comment
 * cases run one by one
