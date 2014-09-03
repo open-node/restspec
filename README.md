@@ -24,19 +24,22 @@ new Restspec(options);
 * `headers` Object, Request customer headers.
 * `data` Fixed, Request send data.
 * `expects` Object, Look [frisbyjs api document](http://frisbyjs.com/docs/api/)
-  ```js
-    expects: {
-      Status: 201,
-      JSON: {
-        id: 1,
-        name: 'Hello world'
-      },
-      JSONTypes: ['parent', {
-        id: Number,
-        name: String
-      }]
-    }
-  ```
+```js
+var case = {
+  uri: '/session',
+  expects: {
+    Status: 201,
+    JSON: {
+      id: 1,
+      name: 'Hello world'
+    },
+    JSONTypes: ['parent', {
+      id: Number,
+      name: String
+    }]
+  }
+}
+```
 
 ## Comment
 * cases run one by one
