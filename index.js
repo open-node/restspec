@@ -70,6 +70,7 @@ Restspec.prototype.testCase = function(_case, callback) {
   if(_case.headers) {
     params.headers = _case.headers
   }
+
   argv.push(params);
   chain = chain[verb].apply(chain, argv);
 
