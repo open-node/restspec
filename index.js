@@ -60,7 +60,7 @@ Restspec.prototype.initGlobals = function() {
 // 测试单个用例
 Restspec.prototype.testCase = function(_case, callback) {
   // 创建一个测试
-  var chain = frisby.create(this.options.name)
+  var chain = frisby.create(_case.name || this.options.name)
     , argv = [this.options.urlRoot + _case.uri];
   // 发起请求
   if(_case.data) {
