@@ -19,13 +19,17 @@ new Restspec(options);
 * `globals` Object, Look [frisby.globalSetup](https://github.com/vlucas/frisby).
 
 ## case
+* `name` String, This is name of case 
 * `uri` String, Request url is `urlRoot` concat `uri`. eg. /session
 * `verb` String, Enum `get`, `post`, `put`, `patch`, `delete` default `get`
 * `headers` Object, Request customer headers.
 * `data` Fixed, Request send data.
+* `inspectJSON`: true, Boolean, Optional, Console output response.JSON where `true`.
+* `inspectBody`: true, Boolean, Optional, Console output response.body where `true`.
 * `expects` Object, Look [frisbyjs api document](http://frisbyjs.com/docs/api/)
 ```js
 var case = {
+  name: 'This is name of case', 
   uri: '/session',
   inspectJSON: true, // console.log will output response.JSON
   inspectBody: true, // console.log will output response.body
