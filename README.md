@@ -27,6 +27,8 @@ new Restspec(options);
 ```js
 var case = {
   uri: '/session',
+  inspectJSON: true, // console.log will output response.JSON
+  inspectBody: true, // console.log will output response.body
   expects: {
     Status: 201,
     JSON: {
