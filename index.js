@@ -64,6 +64,9 @@ Restspec.prototype.testCase = function(_case, callback) {
     , params = {json: true}
     , verb = _case.verb || 'get'
     , argv = [this.options.urlRoot + _case.uri]
+  if(verb !== 'get') {
+    _case.data = _case.data || {};
+  }
   if(_case.data) {
     argv.push(_case.data);
   }

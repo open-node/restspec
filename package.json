@@ -1,6 +1,6 @@
 {
   "name": "restspec",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "description": "REST API test sdk, base on frisbyjs.",
   "main": "index.js",
   "scripts": {
