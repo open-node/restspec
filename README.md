@@ -2,7 +2,7 @@
 
 ## usage
 
-* npm install restspec --save
+* npm install restspec --save-dev
 
 ```js
 var Restspec = require('restspec');
