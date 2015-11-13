@@ -58,7 +58,10 @@ Restspec.prototype.initGlobals = function() {
 };
 
 // 测试单个用例
-Restspec.prototype.testCase = function(_case, callback) {
+Restspec.prototype.testCase = function(memo, _case, callback) {
+  // 判断_case如果是方法，调用传入上个测试的结果获取case
+  if(typeof _case == 'function')
+    _case = _case(memo.body, memo.res);
   // 创建一个测试
   var chain = frisby.create(_case.name || this.options.name)
     , params = {json: true}
@@ -85,7 +88,10 @@ Restspec.prototype.testCase = function(_case, callback) {
     chain = chain['expect' + key].apply(chain, value);
   });
   chain.after(function(error, res, body) {
-    callback();
+    callback(null, {
+      body: body,
+      res: res
+    });
   });
 
   // supper inspectJSON, debugger
@@ -109,7 +115,7 @@ Restspec.prototype.done = function(error) {
 
 // 执行cases
 Restspec.prototype.run = function() {
-  async.eachSeries(this.options.cases, this.testCase, this.done);
+  async.reduce(this.options.cases, {}, this.testCase, this.done);
 };
 
 module.exports = Restspec;
