@@ -88,6 +88,10 @@ Restspec.prototype.testCase = function(memo, _case, callback) {
     chain = chain['expect' + key].apply(chain, value);
   });
   chain.after(function(error, res, body) {
+    // 增加错误处理
+    if (error) throw error;
+    // 增强容错性，实际应用过程中遇到body是字符串的情况，原因不明
+    if (typeof body === 'string') body = JSON.parse(body);
     callback(null, {
       body: body,
       res: res
