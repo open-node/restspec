@@ -1,7 +1,7 @@
 {
   "name": "restspec",
-  "version": "0.7.5",
-  "description": "REST API test sdk, base on frisbyjs.",
+  "version": "1.0.0",
+  "description": "REST API test sdk",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
@@ -14,8 +14,7 @@
     "rest",
     "test",
     "apitest",
-    "spec",
-    "frisbyjs"
+    "spec"
   ],
   "author": "Redstone Zhao",
   "license": "MIT",
@@ -25,8 +24,7 @@
   "homepage": "https://github.com/open-node/restspec",
   "dependencies": {
     "async": "^1.4.0",
-    "frisby": "^0.8.3",
-    "request": "2.35.0",
+    "request": "^2.72.0",
     "underscore": "^1.7.0"
   }
 }
