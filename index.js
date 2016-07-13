@@ -76,7 +76,6 @@ Restspec.prototype.testCase = function(_case, callback) {
       try {
         this['assert' + k](v, res)
       } catch(e) {
-        console.error(e.message, k, v);
         hasError = true;
       }
     }.bind(this))
@@ -108,7 +107,12 @@ Restspec.prototype.equal = function(actual, expected) {
       assert.equal(actual, expected);
     }
   } catch (e) {
-    console.error('ffff', e.message, actual, expected);
+    console.error(
+      e.message,
+      'actual: ' + actual,
+      'expected: ' + expected,
+      e.stack
+    );
     throw e;
   }
 };
@@ -123,7 +127,12 @@ Restspec.prototype.typeEqual = function(actual, expected) {
       assert.equal(actual instanceof expected, true);
     }
   } catch (e) {
-    console.error('ffff', e.message, actual, expected);
+    console.error(
+      e.message,
+      'actual: ' + actual,
+      'expected: ' + expected,
+      e.stack
+    );
     throw e;
   }
 };
@@ -175,9 +184,9 @@ Restspec.prototype.assertJSONLength = function(expect, res) {
 };
 
 Restspec.prototype.assertObject = function(actual, expect) {
-  if (_.isObject(expect)) {
+  if (_.isObject(expect) && !_.isFunction(expect)) {
     _.each(expect, function(v, k) {
-      this.assertObject(v, expect[k]);
+      this.assertObject(actual[k], v);
     }.bind(this))
   } else {
     this.equal(actual, expect);
@@ -185,9 +194,9 @@ Restspec.prototype.assertObject = function(actual, expect) {
 };
 
 Restspec.prototype.assertObjectTypes = function(actual, expect) {
-  if (_.isObject(expect)) {
+  if (_.isObject(expect) && !_.isFunction(expect)) {
     _.each(expect, function(v, k) {
-      this.assertObjectTypes(v, expect[k]);
+      this.assertObjectTypes(actual[k], v);
     }.bind(this))
   } else {
     this.typeEqual(actual, expect);

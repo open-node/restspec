@@ -1,6 +1,6 @@
 {
   "name": "restspec",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "REST API test sdk",
   "main": "index.js",
   "scripts": {
