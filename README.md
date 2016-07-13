@@ -1,4 +1,4 @@
-# restspec rest-api test base on frisbyjs
+# restspec rest-api test
 
 ## usage
 
