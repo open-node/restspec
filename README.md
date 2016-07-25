@@ -91,5 +91,47 @@ var case = {
 }
 ```
 
+```js
+var case = function(lastBody, lastRes) {
+  return {
+    name: 'This is function return case'
+    uri: '/session',
+    expects: {
+      Status: 201,
+      JSON: {
+        id: 1,
+        name: 'Hello world'
+      },
+      JSONTypes: ['parent', {
+        id: Number,
+        name: String
+      }]
+    }
+  }
+};
+```
+
+```js
+var case = function(lastBody, lastRes) {
+  return new Promise(function(resolve, reject) {
+    return resolve({
+      name: 'This is function return case with promise'
+      uri: '/session',
+      expects: {
+        Status: 201,
+        JSON: {
+          id: 1,
+          name: 'Hello world'
+        },
+        JSONTypes: ['parent', {
+          id: Number,
+          name: String
+        }]
+      }
+    })
+  };
+};
+```
+
 ## Comment
 * cases run one by one

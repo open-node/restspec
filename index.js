@@ -51,46 +51,60 @@ Restspec.prototype.initialize = function(opts) {
   }
 };
 
+Restspec.prototype.getCase = function(_case, callback) {
+  // 判断_case如果是方法，调用传入上个测试的结果获取case
+  if(typeof _case !== 'function') return callback(null, _case);
+  _case = _case(last.body, last.res);
+
+  if (_case.then && _case.catch) {
+    _case.then(function(_case) {
+      callback(null, _case);
+    }.bind(this)).catch(callback);
+  } else {
+    callback(null, _case);
+  }
+};
+
 // 测试单个用例
 Restspec.prototype.testCase = function(_case, callback) {
-  // 判断_case如果是方法，调用传入上个测试的结果获取case
-  if(typeof _case == 'function')
-    _case = _case(last.body, last.res);
-  // 创建一个测试
-  var options = {
-    url: this.options.urlRoot + _case.uri,
-    method: _case.verb || 'GET',
-    headers: Object.assign({}, this.options.headers, _case.headers),
-    json: true,
-  };
-  if (_case.data) options.body = _case.data;
-  request(options, function(error, res, body) {
-    if (error) {
-      this.error(error, _case);
-      return callback(null, {body: undefined, res: undefined});
-    }
-    last.res = res;
-    last.body = body;
-    var hasError = false;
-    _.each(_case.expects, function(v, k) {
-      try {
-        this['assert' + k](v, res)
-      } catch(e) {
-        hasError = true;
+  this.getCase(_case, function(error, _case) {
+    if (!_case) return callback(null, {body: null, res: null});
+    // 创建一个测试
+    var options = {
+      url: this.options.urlRoot + _case.uri,
+      method: _case.verb || 'GET',
+      headers: Object.assign({}, this.options.headers, _case.headers),
+      json: true,
+    };
+    if (_case.data) options.body = _case.data;
+    request(options, function(error, res, body) {
+      if (error) {
+        this.error(error, _case);
+        return callback(null, {body: undefined, res: undefined});
       }
-    }.bind(this))
-    if (hasError) {
-      this.failures += 1;
-      process.stdout.write('F');
-      process.stdout.write('\n' + this.failures + ')' + _case.name);
-      process.stdout.write('\nExpects: ' + JSON.stringify(_case.expects, null, 2));
-      process.stdout.write('\nStatusCode: ' + res.statusCode);
-      process.stdout.write('\nHeaders: ' + JSON.stringify(res.headers, null, 2));
-      process.stdout.write('\nBody: ' + JSON.stringify(body, null, 2));
-    } else {
-      process.stdout.write('.');
-    }
-    callback(null, {body: body, res: res});
+      last.res = res;
+      last.body = body;
+      var hasError = false;
+      _.each(_case.expects, function(v, k) {
+        try {
+          this['assert' + k](v, res)
+        } catch(e) {
+          hasError = true;
+        }
+      }.bind(this))
+      if (hasError) {
+        this.failures += 1;
+        process.stdout.write('F');
+        process.stdout.write('\n' + this.failures + ')' + _case.name);
+        process.stdout.write('\nExpects: ' + JSON.stringify(_case.expects, null, 2));
+        process.stdout.write('\nStatusCode: ' + res.statusCode);
+        process.stdout.write('\nHeaders: ' + JSON.stringify(res.headers, null, 2));
+        process.stdout.write('\nBody: ' + JSON.stringify(body, null, 2));
+      } else {
+        process.stdout.write('.');
+      }
+      callback(null, {body: body, res: res});
+    }.bind(this));
   }.bind(this));
 };
 
@@ -110,8 +124,7 @@ Restspec.prototype.equal = function(actual, expected) {
     console.error(
       e.message,
       'actual: ' + actual,
-      'expected: ' + expected,
-      e.stack
+      'expected: ' + expected
     );
     throw e;
   }
@@ -130,8 +143,7 @@ Restspec.prototype.typeEqual = function(actual, expected) {
     console.error(
       e.message,
       'actual: ' + actual,
-      'expected: ' + expected,
-      e.stack
+      'expected: ' + expected
     );
     throw e;
   }
