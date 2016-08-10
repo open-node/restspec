@@ -2,7 +2,18 @@ var async   = require('async')
   , assert  = require('assert')
   , request = require('request')
   , last    = {}
-  , _       = require('underscore');
+  , _       = require('underscore')
+  , queue   = []
+  , inMocha = _.isFunction(global.describe) && _.isFunction(global.it);
+
+var execQueue = function() {
+  var fn = queue.shift();
+  fn && fn(execQueue);
+};
+
+if (!inMocha) {
+  global.it = function(name, callback) { queue.push(callback) };
+}
 
 function Restspec(opts) {
   this.startedAt = new Date();
@@ -51,60 +62,47 @@ Restspec.prototype.initialize = function(opts) {
   }
 };
 
-Restspec.prototype.getCase = function(_case, callback) {
-  // 判断_case如果是方法，调用传入上个测试的结果获取case
-  if(typeof _case !== 'function') return callback(null, _case);
-  _case = _case(last.body, last.res);
-
-  if (_case.then && _case.catch) {
-    _case.then(function(_case) {
-      callback(null, _case);
-    }.bind(this)).catch(callback);
-  } else {
-    callback(null, _case);
-  }
-};
-
 // 测试单个用例
 Restspec.prototype.testCase = function(_case, callback) {
-  this.getCase(_case, function(error, _case) {
-    if (!_case) return callback(null, {body: null, res: null});
-    // 创建一个测试
-    var options = {
-      url: this.options.urlRoot + _case.uri,
-      method: _case.verb || 'GET',
-      headers: Object.assign({}, this.options.headers, _case.headers),
-      json: true,
-    };
-    if (_case.data) options.body = _case.data;
-    request(options, function(error, res, body) {
-      if (error) {
-        this.error(error, _case);
-        return callback(null, {body: undefined, res: undefined});
+  if (!_case) {
+    return callback();
+  }
+  // 创建一个测试
+  var options = {
+    url: this.options.urlRoot + _case.uri,
+    method: _case.verb || 'GET',
+    headers: Object.assign({}, this.options.headers, _case.headers),
+    json: true,
+  };
+  if (_case.data) options.body = _case.data;
+  request(options, function(error, res, body) {
+    var hasError = false;
+    if (error) {
+      this.error(error, _case);
+      return callback()
+    }
+    last.res = res;
+    last.body = body;
+    _.each(_case.expects, function(v, k) {
+      if (inMocha) return this['assert' + k](v, res)
+      try {
+        this['assert' + k](v, res)
+      } catch(e) {
+        hasError = true;
       }
-      last.res = res;
-      last.body = body;
-      var hasError = false;
-      _.each(_case.expects, function(v, k) {
-        try {
-          this['assert' + k](v, res)
-        } catch(e) {
-          hasError = true;
-        }
-      }.bind(this))
-      if (hasError) {
-        this.failures += 1;
-        process.stdout.write('F');
-        process.stdout.write('\n' + this.failures + ')' + _case.name);
-        process.stdout.write('\nExpects: ' + JSON.stringify(_case.expects, null, 2));
-        process.stdout.write('\nStatusCode: ' + res.statusCode);
-        process.stdout.write('\nHeaders: ' + JSON.stringify(res.headers, null, 2));
-        process.stdout.write('\nBody: ' + JSON.stringify(body, null, 2));
-      } else {
-        process.stdout.write('.');
-      }
-      callback(null, {body: body, res: res});
-    }.bind(this));
+    }.bind(this))
+    if (!inMocha && hasError) {
+      this.failures += 1;
+      process.stdout.write('F');
+      process.stdout.write('\n' + this.failures + ')' + _case.name);
+      process.stdout.write('\nExpects: ' + JSON.stringify(_case.expects, null, 2));
+      process.stdout.write('\nStatusCode: ' + res.statusCode);
+      process.stdout.write('\nHeaders: ' + JSON.stringify(res.headers, null, 2));
+      process.stdout.write('\nBody: ' + JSON.stringify(body, null, 2));
+    } else {
+      process.stdout.write('.');
+    }
+    callback()
   }.bind(this));
 };
 
@@ -113,39 +111,21 @@ Restspec.prototype.error = function(error, _case) {
 };
 
 Restspec.prototype.equal = function(actual, expected) {
-  try {
-    this.assertions += 1;
-    if (_.isFunction(expected)) {
-      expected(actual, assert);
-    } else {
-      assert.equal(actual, expected);
-    }
-  } catch (e) {
-    console.error(
-      e.message,
-      'actual: ' + actual,
-      'expected: ' + expected
-    );
-    throw e;
+  this.assertions += 1;
+  if (_.isFunction(expected)) {
+    expected(actual, assert);
+  } else {
+    assert.equal(actual, expected);
   }
 };
 
 Restspec.prototype.typeEqual = function(actual, expected) {
   if (actual == null) return;
-  try {
-    this.assertions += 1;
-    if (_.isFunction(expected)) {
-      expected(actual, assert);
-    } else {
-      assert.equal(actual instanceof expected, true);
-    }
-  } catch (e) {
-    console.error(
-      e.message,
-      'actual: ' + actual,
-      'expected: ' + expected
-    );
-    throw e;
+  this.assertions += 1;
+  if (_.isFunction(expected)) {
+    expected(actual, assert);
+  } else {
+    assert.equal(actual instanceof expected, true);
   }
 };
 
@@ -216,6 +196,7 @@ Restspec.prototype.assertObjectTypes = function(actual, expect) {
 };
 
 Restspec.prototype.stats = function() {
+  if (inMocha) return _.pick(this, ['tests', 'assertions', 'failures', 'skipped']);
   return [
     [this.tests, "tests"],
     [this.assertions, "assertions"],
@@ -225,12 +206,14 @@ Restspec.prototype.stats = function() {
 };
 
 // 测试执行完毕
-Restspec.prototype.done = function(error) {
-  process.stdout.write('\n');
-  console.log("Finished " + this.consumed() + " in seconds")
-  console.log(this.stats.bind(this)(), '\n\n');
+Restspec.prototype.done = function() {
+  if (!inMocha) {
+    process.stdout.write('\n\n');
+    console.log("Finished " + this.consumed() + " in seconds")
+    console.log(this.stats(), '\n\n');
+  }
   if(this.options.hooks.done) {
-    this.options.hooks.done(error);
+    this.options.hooks.done(this.stats());
   }
 };
 
@@ -241,11 +224,36 @@ Restspec.prototype.consumed = function() {
 // 执行cases
 Restspec.prototype.run = function() {
   this.tests = this.options.cases.length;
-  async.mapSeries(
-    this.options.cases,
-    this.testCase.bind(this),
-    this.done.bind(this)
-  );
+  _.each(this.options.cases, function(_case, index) {
+    var caseName;
+
+    // 判断_case如果是方法，调用传入上个测试的结果获取case
+    if (typeof _case !== 'function') {
+      caseName = _case.name;
+    } else {
+      caseName = 'The test case is function ' + index;
+    }
+
+    it(caseName, function(done) {
+      if (typeof _case !== 'function') return this.testCase(_case, done);
+      _case = _case(last.body, last.res);
+      if (_case.then && _case.catch) {
+        return _case.then(function(_case) {
+          this.testCase(_case, done);
+        }.bind(this)).catch(function(e) {
+          done();
+        });
+      } else {
+        this.testCase(_case, done);
+      }
+    }.bind(this));
+  }.bind(this));
+  it("The last one test case", function(done) {
+    assert.ok(true);
+    this.done();
+    done()
+  }.bind(this));
+  if (!inMocha) execQueue();
 };
 
 module.exports = Restspec;
