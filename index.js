@@ -76,22 +76,24 @@ Restspec.prototype.testCase = function(_case, callback) {
   };
   if (_case.data) options.body = _case.data;
   request(options, function(error, res, body) {
-    var hasError = false;
+    var hasError = false
+      , k;
     if (error) {
       this.error(error, _case);
       return callback()
     }
     last.res = res;
     last.body = body;
-    _.each(_case.expects, function(v, k) {
-      if (inMocha) return this['assert' + k](v, res)
+    for (k in _case.expects) {
       try {
-        this['assert' + k](v, res)
+        this['assert' + k](_case.expects[k], res)
       } catch(e) {
+        if (inMocha) return callback(e);
         hasError = true;
       }
-    }.bind(this))
-    if (!inMocha && hasError) {
+    }
+    if (inMocha) return callback();
+    if (hasError) {
       this.failures += 1;
       process.stdout.write('F');
       process.stdout.write('\n' + this.failures + ')' + _case.name);
