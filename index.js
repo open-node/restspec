@@ -88,7 +88,13 @@ Restspec.prototype.testCase = function(_case, callback) {
       try {
         this['assert' + k](_case.expects[k], res)
       } catch(e) {
-        if (inMocha) return callback(e);
+        if (inMocha) {
+          process.stdout.write('\nCase: ' + JSON.stringify(_case, null, 2));
+          process.stdout.write('\nHeaders: ' + JSON.stringify(res.headers, null, 2));
+          process.stdout.write('\nStatusCode: ' + res.statusCode);
+          process.stdout.write('\nBody: ' + JSON.stringify(body, null, 2));
+          return callback(e);
+        }
         hasError = true;
       }
     }
