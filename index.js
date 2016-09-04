@@ -75,6 +75,7 @@ Restspec.prototype.testCase = function(_case, callback) {
     json: true,
   };
   if (_case.data) options.body = _case.data;
+  if (_case.formData) options.formData = _case.formData;
   request(options, function(error, res, body) {
     var hasError = false
       , k;
