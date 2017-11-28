@@ -247,7 +247,7 @@ Restspec.prototype.run = function() {
       if (typeof _case !== 'function') return this.testCase(_case, done);
       _case = _case(last.body, last.res);
       if (_case.then && _case.catch) {
-        return _case.then(function(_case) {
+        _case.then(function(_case) {
           this.testCase(_case, done);
         }.bind(this)).catch(function(e) {
           done();
