@@ -133,5 +133,20 @@ var case = function(lastBody, lastRes) {
 };
 ```
 
+```js
+var case = async () => {
+  const user = await Model.findOne({ where: { id: 1 } });
+
+    return () => {
+      const { age } = user;
+
+      if (age <= 18) return new Error(`Adult only: ${age}`);
+
+      return null;
+    };
+  };
+};
+```
+
 ## Comment
 * cases run one by one
