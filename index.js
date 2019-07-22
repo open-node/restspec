@@ -78,6 +78,7 @@ Restspec.prototype.testCase = function(_case, callback) {
     const err = _case();
 
     if (err) return callback(err);
+
     return callback();
   }
 
