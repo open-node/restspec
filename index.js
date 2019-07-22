@@ -67,6 +67,20 @@ Restspec.prototype.testCase = function(_case, callback) {
   if (!_case) {
     return callback();
   }
+
+  /**
+    If the result of case is function, call it.
+  
+    @author Witee<github.com/Witee>
+    @date   2019-07-22
+  */
+  if (typeof _case === 'function') {
+    const err = _case();
+
+    if (err) return callback(err);
+    return callback();
+  }
+
   // 创建一个测试
   var options = {
     url: this.options.urlRoot + _case.uri,
