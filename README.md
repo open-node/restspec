@@ -137,6 +137,7 @@ var case = function(lastBody, lastRes) {
 var case = async () => {
   const user = await Model.findOne({ where: { id: 1 } });
 
+    // If the function is returned, it will be called.
     return () => {
       const { age } = user;
 
