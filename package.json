@@ -1,21 +1,13 @@
 {
   "name": "restspec",
-  "version": "3.0.1",
+  "version": "3.1.0",
   "description": "REST API test sdk",
   "main": "index.js",
-  "scripts": {
-    "test": "mocha"
-  },
   "repository": {
     "type": "git",
     "url": "git@github.com:open-node/restspec.git"
   },
-  "keywords": [
-    "rest",
-    "test",
-    "apitest",
-    "spec"
-  ],
+  "keywords": ["rest", "test", "apitest", "spec"],
   "author": "Redstone Zhao",
   "license": "MIT",
   "bugs": {
