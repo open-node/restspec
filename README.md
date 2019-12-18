@@ -149,5 +149,15 @@ var case = async () => {
 };
 ```
 
+```js
+var case = () => {
+  const age = 17;
+  // Error instances can be returned directly.
+  if (age <= 18) return new Error(`Adult only: ${age}`);
+
+  return null;
+};
+```
+
 ## Comment
 * cases run one by one
