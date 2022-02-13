@@ -1,6 +1,6 @@
 {
   "name": "restspec",
-  "version": "3.2.0",
+  "version": "3.2.1",
   "description": "REST API test sdk",
   "main": "index.js",
   "repository": {
