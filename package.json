@@ -15,7 +15,7 @@
   },
   "homepage": "https://github.com/open-node/restspec",
   "dependencies": {
-    "async": "^1.4.0",
+    "async": "^3.2.2",
     "request": "^2.72.0",
     "underscore": "^1.7.0"
   }
